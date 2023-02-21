@@ -51,50 +51,100 @@ const getWeather = async (recipients) => {
     );
     const snowChance =
       weatherResponse.data.forecast.forecastday[0].day.daily_chance_of_snow;
-    person.snowChance = snowChance;
-    result.push(person);
+    const cityName = weatherResponse.data.location.name;
+    const tempHigh = weatherResponse.data.forecast.forecastday[0].day.maxtemp_f;
+    const weatherCondition =
+      weatherResponse.data.forecast.forecastday[0].day.condition.text;
+    const snowAmount =
+      weatherResponse.data.forecast.forecastday[0].day.maxtemp_f;
+
+    const updatedPerson = {
+      ...person,
+      snowChance,
+      snowAmount,
+      cityName,
+      tempHigh,
+      weatherCondition,
+    };
+
+    result.push(updatedPerson);
+    console.log(result);
   }
-  // console.log(result);
   return result;
 };
 
-const createMessage = (recipients) => {
+// const weatherReport = (recipients) => {
+//   console.log(recipients);
+//   recipients.forEach((person) => {
+//     const message = `There is a ${person.snowChance}% chance of snow today in ${person.cityName}. The high temperature is ${person.tempHigh} degrees Fahrenheit and the weather condition is ${person.weatherCondition}.`;
+
+//     client.messages
+//       .create({
+//         body: message,
+//         to: "+16176945102", // Text this number
+//         from: "+18443292805", // From a valid Twilio number
+//       })
+//       .then((message) => console.log(message.sid));
+//   });
+// };
+
+// const snowReport = (recipients) => {
+//   console.log(recipients);
+//   const recipientsWithSnow = recipients.filter(
+//     (person) => person.snowChance !== 0
+//   );
+//   console.log(recipientsWithSnow);
+//   if (recipientsWithSnow.length > 0) {
+//     recipientsWithSnow.forEach((person) => {
+//       const snowMessage = `Get your gear ready! There is a ${person.snowChance}% chance of snow today in ${person.cityName}.`;
+
+//       client.messages
+//         .create({
+//           body: snowMessage,
+//           to: "+16176945102", // Text this number
+//           from: "+18443292805", // From a valid Twilio number
+//         })
+//         .then((message) => console.log(message.sid));
+//     });
+//   }
+// };
+
+const sendWeatherReport = (recipients) => {
   console.log(recipients);
-  const recipientsWithSnow = recipients.filter(
-    (person) => person.snowChance !== 0
-  );
-  const recipientsWithNoSnow = recipients.filter(
-    (person) => person.snowChance == 0
-  );
-  console.log(recipientsWithSnow);
-  console.log(recipientsWithNoSnow);
-  if (recipientsWithSnow.length > 0) {
-    // for each recipient make and send a message
-    client.messages
-      .create({
-        body: "There is a chance of snow today",
-        to: "+16176945102", // Text this number
-        from: "+18443292805", // From a valid Twilio number
-      })
-      .then((message) => console.log(message.sid));
-  }
-  if (recipientsWithNoSnow.length > 0) {
-    // for each recipient make and send a message
-    client.messages
-      .create({
-        body: "Sorry! No chance of snow today",
-        to: "+16176945102", // Text this number
-        from: "+18443292805", // From a valid Twilio number
-      })
-      .then((message) => console.log(message.sid));
-  }
+  const currentMSTtimeInHours = new Date().getHours().toLocaleString("en-US", {
+    timeZone: "America/Denver",
+  });
+  recipients.forEach((person) => {
+    if (person.snowChance !== 0) {
+      const snowMessage = `Get your gear ready! There is a ${person.snowChance}% chance of snow today in ${person.cityName}.`;
+      client.messages
+        .create({
+          body: snowMessage,
+          to: "+16176945102",
+          from: "+18443292805", // From a valid Twilio number
+        })
+        .then((message) => console.log(message.sid));
+    }
+    if (person.snowChance === 0 && currentMSTtimeInHours == 12) {
+      const weatherMessage = `There is a ${person.snowChance}% chance of snow today in ${person.cityName}. The high temperature is ${person.tempHigh} degrees Fahrenheit and the weather condition is ${person.weatherCondition}.`;
+      client.messages
+        .create({
+          body: weatherMessage,
+          to: "+16176945102",
+          from: "+18443292805", // From a valid Twilio number
+        })
+        .then((message) => console.log(message.sid));
+    }
+  });
 };
 
 module.exports.handler = async () => {
   const recipientsData = await getAllRecipientsFromDB();
   const weatherData = await getWeather(recipientsData);
   // console.log("L79", weatherData);
-  const message = await createMessage(weatherData);
+  // await weatherReport(weatherData);
+  // await snowReport(weatherData);
+  await sendWeatherReport(weatherData);
   // await getWeather(recipientsData);
   // await createMessage(weatherData);
   // console.log(message);
