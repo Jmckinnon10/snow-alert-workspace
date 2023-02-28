@@ -1,17 +1,17 @@
-const axios = require("axios");
-const customCreds = require("./customCreds.json");
-const client = require("twilio")(
-  customCreds.twilioSID,
-  customCreds.twilioToken
-);
+// const axios = require("axios");
+// const customCreds = require("./customCreds.json");
+// const client = require("twilio")(
+//   customCreds.twilioSID,
+//   customCreds.twilioToken
+// );
 
-client.messages
-  .create({
-    body: "Hello from twilio-node",
-    to: "+16176945102", // Text this number
-    from: "+18443292805", // From a valid Twilio number
-  })
-  .then((message) => console.log(message.sid));
+// client.messages
+//   .create({
+//     body: "Hello from twilio-node",
+//     to: "+16176945102", // Text this number
+//     from: "+18443292805", // From a valid Twilio number
+//   })
+//   .then((message) => console.log(message.sid));
 // const getWeather = async (recipients) => {
 //   const result = [];
 //   let weatherResponse;
@@ -31,4 +31,10 @@ client.messages
 
 // make message function
 
-// send message function
+const date = new Date();
+date.setUTCHours(23, 10, 0); // set the UTC hours to 21 (which corresponds to 2:10 PM Mountain Time)
+const timeString = date.toLocaleTimeString("en-US", {
+  timeZone: "America/Denver",
+  hour12: false,
+});
+console.log(timeString);

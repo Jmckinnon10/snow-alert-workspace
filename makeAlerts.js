@@ -111,17 +111,18 @@ const getWeather = async (recipients) => {
 
 const sendWeatherReport = (recipients) => {
   console.log(recipients);
-  const currentMSTtimeInHours = new Date().getHours().toLocaleString("en-US", {
-    timeZone: "America/Denver",
-  });
+  const now = new Date();
+  const options = { timeZone: "America/Denver", hour12: false };
+  const currentHour = new Date().getHours();
+  const currentMinute = new Date().getMinutes();
   recipients.forEach((person) => {
     if (person.snowChance !== 0) {
-      const snowMessage = `Get your gear ready! There is a ${person.snowChance}% chance of snow today in ${person.cityName}.`;
+      const snowMessage = `Get your gear ready! There is a ${person.snowChance}% chance of snow today that could accumulate to ${person.snowAmount} cm in ${person.cityName}.`;
       client.messages
         .create({
           body: snowMessage,
           to: "+16176945102",
-          from: "+18443292805", // From a valid Twilio number
+          from: "+18443292805",
         })
         .then((message) => console.log(message.sid));
     }
@@ -131,7 +132,7 @@ const sendWeatherReport = (recipients) => {
         .create({
           body: weatherMessage,
           to: "+16176945102",
-          from: "+18443292805", // From a valid Twilio number
+          from: "+18443292805",
         })
         .then((message) => console.log(message.sid));
     }
